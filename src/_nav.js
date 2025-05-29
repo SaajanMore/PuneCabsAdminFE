@@ -28,6 +28,36 @@ const _nav = [
   },
   {
     component: CNavTitle,
+    name: 'Masters',
+    to: '/masters',
+  },
+  {
+    component: CNavGroup,
+    name: 'Cab Masters',
+    to: '/masters',
+    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Manufacturers',
+
+        to: '/cabmasters/manufacterers',
+      },
+      {
+        component: CNavItem,
+        name: 'Models',
+        to: '/masters/models',
+      },
+    ],
+  },
+  // {
+  //   component: CNavItem,
+  //   name: 'Cab Types',
+  //   to: '/masters/cabmasters',
+  //   icon: <CIcon icon={cilDrop} customClassName="nav-icon" />,
+  // },
+  {
+    component: CNavTitle,
     name: 'Theme',
   },
   {
