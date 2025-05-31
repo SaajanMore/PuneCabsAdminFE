@@ -1,35 +1,15 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import MasterLayout from '../../../layout/MasterLayout'
-import { getManufacturers } from '../../../api/MasterApis/CabMasters'
 
-// Dummy data to simulate entries
 const initialData = [
   { id: 1, name: 'John Doe', email: 'john@example.com', cab: 'Swift Dzire' },
   { id: 2, name: 'Jane Smith', email: 'jane@example.com', cab: 'Toyota Etios' },
-  { id: 3, name: 'Ali Khan', email: 'ali@example.com', cab: 'Hyundai Xcent' },
-  { id: 4, name: 'Amit Ray', email: 'amit@example.com', cab: 'Innova Crysta' },
-  { id: 5, name: 'Sana Malik', email: 'sana@example.com', cab: 'Honda City' },
-  { id: 6, name: 'Rajiv Mehra', email: 'rajiv@example.com', cab: 'Tata Tiago' },
 ]
 
-const Manufacterers = () => {
-  // States
+const Models = () => {
   const [data, setData] = useState(initialData)
   const [formData, setFormData] = useState({ name: '', email: '', cab: '' })
   const [editingIndex, setEditingIndex] = useState(null)
-  const [manufacturers, setManufacturers] = useState([])
-
-  useEffect(() => {
-    getManufacturers()
-      .then((response) => {
-        if (response && response.data) {
-          setManufacturers(response.data)
-        } else {
-          console.error('Failed to fetch manufacturers')
-        }
-      })
-      .catch((error) => console.error(error))
-  }, [])
 
   const columns = [
     { key: 'id', label: 'ID' },
@@ -70,7 +50,7 @@ const Manufacterers = () => {
 
   return (
     <MasterLayout
-      title="Manufacturers"
+      title="Models"
       data={data}
       columns={columns}
       formFields={formFields}
@@ -78,10 +58,9 @@ const Manufacterers = () => {
       setFormData={setFormData}
       onSubmit={handleSubmit}
       onEdit={handleEdit}
-      onDeleteConfirmed={handleDelete}
-      deleteType="danger"
+      onDelete={handleDelete}
     />
   )
 }
 
-export default Manufacterers
+export default Models

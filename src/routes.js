@@ -51,7 +51,9 @@ const Toasts = React.lazy(() => import('./views/notifications/toasts/Toasts'))
 
 const Widgets = React.lazy(() => import('./views/widgets/Widgets'))
 
+const CabCategories = React.lazy(() => import('./views/masters/cabmasters/CabCategories'))
 const Manufacterers = React.lazy(() => import('./views/masters/cabmasters/Manufacterers'))
+const Models = React.lazy(() => import('./views/masters/cabmasters/Models'))
 
 const routes = [
   { path: '/', exact: true, name: 'Home' },
@@ -99,7 +101,11 @@ const routes = [
   { path: '/notifications/modals', name: 'Modals', element: Modals },
   { path: '/notifications/toasts', name: 'Toasts', element: Toasts },
   { path: '/widgets', name: 'Widgets', element: Widgets },
-  { path: '/cabmasters/manufacterers', name: 'Masters', element: Manufacterers },
+  { path: '/masters', name: 'Masters' },
+  { path: '/masters/cabmasters', name: 'Cab Masters' },
+  { path: '/masters/cabmasters/cab_categories', name: 'Cab Categories', element: CabCategories },
+  { path: '/masters/cabmasters/manufacterers', name: 'Manufacterers', element: Manufacterers },
+  { path: '/masters/cabmasters/models', name: 'Models', element: Models },
 ]
 
 export default routes

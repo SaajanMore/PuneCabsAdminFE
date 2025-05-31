@@ -1,0 +1,10 @@
+.custom-navlink {
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.custom-navlink:hover {
+  opacity: 1 !important;
+  color: #0d6efd !important;
+  text-decoration: underline;
+}

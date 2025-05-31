@@ -29,24 +29,28 @@ const _nav = [
   {
     component: CNavTitle,
     name: 'Masters',
-    to: '/masters',
+    // to: '/masters',
   },
   {
     component: CNavGroup,
     name: 'Cab Masters',
-    to: '/masters',
+    to: '/masters/cabmasters',
     icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
     items: [
       {
         component: CNavItem,
+        name: 'Cab Categories',
+        to: '/masters/cabmasters/cab_categories',
+      },
+      {
+        component: CNavItem,
         name: 'Manufacturers',
-
-        to: '/cabmasters/manufacterers',
+        to: '/masters/cabmasters/manufacterers',
       },
       {
         component: CNavItem,
         name: 'Models',
-        to: '/masters/models',
+        to: '/masters/cabmasters/models',
       },
     ],
   },
