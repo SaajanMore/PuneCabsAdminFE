@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   CButton,
   CCard,
@@ -10,6 +10,7 @@ import {
   CForm,
   CFormInput,
   CFormLabel,
+  CFormSelect,
   CInputGroup,
   CRow,
   CTable,
@@ -25,12 +26,13 @@ import {
   CNavLink,
   CTabContent,
   CTabPane,
+  CSpinner,
 } from '@coreui/react'
-import DeleteConfirmationModal from '../components/popups/DeleteConfirmationModal ' // 👈 Add your dialog component
+import DeleteConfirmationModal from '../components/popups/DeleteConfirmationModal '
 
 const MasterLayout = ({
   title,
-  data,
+  data, // deprecated but kept for backward compatibility
   columns,
   formFields,
   formData,
@@ -39,31 +41,71 @@ const MasterLayout = ({
   onEdit,
   deleteType,
   onDeleteConfirmed,
+  fetchData, // function to fetch paginated data
 }) => {
   const [search, setSearch] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [activeTab, setActiveTab] = useState(0)
   const [deleteDialog, setDeleteDialog] = useState({ show: false, item: null })
-  const itemsPerPage = 5
+  const [dropdownOptions, setDropdownOptions] = useState({})
+  const [items, setItems] = useState([])
+  const [totalPages, setTotalPages] = useState(1)
+  const [loading, setLoading] = useState(false)
 
-  const filteredData = data.filter((item) =>
-    Object.values(item).some((val) => val.toString().toLowerCase().includes(search.toLowerCase())),
-  )
+  const itemsPerPage = 2
 
-  const paginatedData = filteredData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
-  )
-
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage)
-
-  const confirmDelete = (item) => {
-    setDeleteDialog({ show: true, item })
+  const loadData = async () => {
+    if (!fetchData) return
+    setLoading(true)
+    try {
+      const res = await fetchData(currentPage, search)
+      setItems(res.results)
+      setTotalPages(Math.ceil(res.count / itemsPerPage))
+    } catch (err) {
+      console.error('Failed to fetch data:', err)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const proceedDelete = () => {
+  useEffect(() => {
+    if (activeTab === 0) {
+      loadData()
+    }
+  }, [currentPage, search, activeTab])
+
+  useEffect(() => {
+    formFields.forEach(async (field) => {
+      if (field.type === 'select' && field.api) {
+        try {
+          const res = await fetch(field.api)
+          const json = await res.json()
+          setDropdownOptions((prev) => ({ ...prev, [field.name]: json.results || json }))
+        } catch (error) {
+          console.error(`Error fetching options for ${field.name}`, error)
+        }
+      }
+    })
+  }, [formFields])
+
+  const confirmDelete = (item) => setDeleteDialog({ show: true, item })
+
+  const proceedDelete = async () => {
     if (onDeleteConfirmed && deleteDialog.item) {
-      onDeleteConfirmed(deleteDialog.item)
+      await onDeleteConfirmed(deleteDialog.item)
+
+      // Reload data to see if we need to shift to previous page
+      const res = await fetchData(currentPage, search)
+
+      const isLastItemOnPage = res.results.length === 0 && currentPage > 1
+      const newPage = isLastItemOnPage ? currentPage - 1 : currentPage
+
+      setCurrentPage(newPage)
+
+      // Refetch after updating currentPage
+      const updatedRes = await fetchData(newPage, search)
+      setItems(updatedRes.results)
+      setTotalPages(Math.ceil(updatedRes.count / itemsPerPage))
     }
     setDeleteDialog({ show: false, item: null })
   }
@@ -99,7 +141,10 @@ const MasterLayout = ({
                 <CFormInput
                   placeholder="Search..."
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(e) => {
+                    setSearch(e.target.value)
+                    setCurrentPage(1)
+                  }}
                 />
               </CInputGroup>
             </CCol>
@@ -110,50 +155,57 @@ const MasterLayout = ({
               <CCardTitle>{title} List</CCardTitle>
             </CCardHeader>
             <CCardBody>
-              <CTable striped hover responsive>
-                <CTableHead>
-                  <CTableRow>
-                    {columns.map((col) => (
-                      <CTableHeaderCell key={col.key}>{col.label}</CTableHeaderCell>
-                    ))}
-                    <CTableHeaderCell>Actions</CTableHeaderCell>
-                  </CTableRow>
-                </CTableHead>
-                <CTableBody>
-                  {paginatedData.map((item, idx) => (
-                    <CTableRow key={idx}>
+              {loading ? (
+                <div className="text-center">
+                  <CSpinner />
+                </div>
+              ) : (
+                <CTable striped hover responsive>
+                  <CTableHead>
+                    <CTableRow>
                       {columns.map((col) => (
-                        <CTableDataCell key={col.key}>
-                          {col.key === 'sno'
-                            ? (currentPage - 1) * itemsPerPage + idx + 1
-                            : item[col.key]}
-                        </CTableDataCell>
+                        <CTableHeaderCell key={col.key}>{col.label}</CTableHeaderCell>
                       ))}
-                      <CTableDataCell>
-                        <CButton
-                          size="sm"
-                          color="info"
-                          className="me-2"
-                          onClick={() => {
-                            onEdit(item, idx), setActiveTab(1)
-                          }}
-                        >
-                          Edit
-                        </CButton>
-                        <CButton size="sm" color="danger" onClick={() => confirmDelete(item)}>
-                          Delete
-                        </CButton>
-                      </CTableDataCell>
+                      <CTableHeaderCell>Actions</CTableHeaderCell>
                     </CTableRow>
-                  ))}
-                </CTableBody>
-              </CTable>
+                  </CTableHead>
+                  <CTableBody>
+                    {items.map((item, idx) => (
+                      <CTableRow key={idx}>
+                        {columns.map((col) => (
+                          <CTableDataCell key={col.key}>
+                            {col.key === 'sno'
+                              ? (currentPage - 1) * itemsPerPage + idx + 1
+                              : item[col.key]}
+                          </CTableDataCell>
+                        ))}
+                        <CTableDataCell>
+                          <CButton
+                            size="sm"
+                            color="info"
+                            className="me-2"
+                            onClick={() => {
+                              onEdit(item, idx)
+                              setActiveTab(1)
+                            }}
+                          >
+                            Edit
+                          </CButton>
+                          <CButton size="sm" color="danger" onClick={() => confirmDelete(item)}>
+                            Delete
+                          </CButton>
+                        </CTableDataCell>
+                      </CTableRow>
+                    ))}
+                  </CTableBody>
+                </CTable>
+              )}
             </CCardBody>
             <CCardFooter>
               <CPagination align="end">
                 {[...Array(totalPages)].map((_, idx) => (
                   <CPaginationItem
-                    key={idx + 1}
+                    key={idx}
                     active={currentPage === idx + 1}
                     onClick={() => setCurrentPage(idx + 1)}
                     style={{ cursor: 'pointer' }}
@@ -177,16 +229,50 @@ const MasterLayout = ({
                   {formFields.map((field) => (
                     <CCol md={4} key={field.name}>
                       <CFormLabel>{field.label}</CFormLabel>
-                      <CFormInput
-                        name={field.name}
-                        value={formData[field.name] || ''}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            [field.name]: e.target.value,
-                          }))
-                        }
-                      />
+                      {field.type === 'select' ? (
+                        field.options ? (
+                          <CFormSelect
+                            name={field.name}
+                            value={formData[field.name] || ''}
+                            onChange={(e) =>
+                              setFormData((prev) => ({ ...prev, [field.name]: e.target.value }))
+                            }
+                          >
+                            <option value="">-- Select --</option>
+                            {field.options.map((opt) => (
+                              <option key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </option>
+                            ))}
+                          </CFormSelect>
+                        ) : dropdownOptions[field.name] ? (
+                          <CFormSelect
+                            name={field.name}
+                            value={formData[field.name] || ''}
+                            onChange={(e) =>
+                              setFormData((prev) => ({ ...prev, [field.name]: e.target.value }))
+                            }
+                          >
+                            <option value="">-- Select --</option>
+                            {dropdownOptions[field.name].map((opt) => (
+                              <option key={opt.value || opt.id} value={opt.value || opt.id}>
+                                {opt.label || opt.name}
+                              </option>
+                            ))}
+                          </CFormSelect>
+                        ) : (
+                          <CSpinner size="sm" />
+                        )
+                      ) : (
+                        <CFormInput
+                          type={field.type || 'text'}
+                          name={field.name}
+                          value={formData[field.name] || ''}
+                          onChange={(e) =>
+                            setFormData((prev) => ({ ...prev, [field.name]: e.target.value }))
+                          }
+                        />
+                      )}
                     </CCol>
                   ))}
                 </CRow>
@@ -201,7 +287,6 @@ const MasterLayout = ({
         </CTabPane>
       </CTabContent>
 
-      {/* 🔴 Delete Confirmation Dialog */}
       <DeleteConfirmationModal
         show={deleteDialog.show}
         onClose={() => setDeleteDialog({ show: false, item: null })}

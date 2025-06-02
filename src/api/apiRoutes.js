@@ -6,16 +6,16 @@ export const masters = {
     updateCabCategory: (id) => `cabs/categories/${id}/`,
     deleteCabCategory: (id) => `cabs/categories/${id}/`,
 
-    // Manufacturers
-    addManufacterer: 'masters/cabmasters/manufacturers/',
-    getManufacterers: 'masters/cabmasters/manufacturers/',
-    updateManufacterer: (id) => `masters/cabmasters/manufacturers/${id}/`,
-    deleteManufacterer: (id) => `masters/cabmasters/manufacturers/${id}/`,
+    // manufacterers
+    addManufacterer: 'cabs/manufacterers/',
+    getManufacterers: 'cabs/manufacterers/',
+    updateManufacterer: (id) => `cabs/manufacterers/${id}/`,
+    deleteManufacterer: (id) => `cabs/manufacterers/${id}/`,
 
     // Models
-    addModel: 'masters/cabmasters/models/',
-    getModels: 'masters/cabmasters/models/',
-    updateModel: (id) => `masters/cabmasters/models/${id}/`,
-    deleteModel: (id) => `masters/cabmasters/models/${id}/`,
+    addModel: 'cabs/models/',
+    getModels: 'cabs/models/',
+    updateModel: (id) => `cabs/models/${id}/`,
+    deleteModel: (id) => `cabs/models/${id}/`,
   },
 }

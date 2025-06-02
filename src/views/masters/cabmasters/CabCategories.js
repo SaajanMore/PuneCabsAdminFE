@@ -1,84 +1,133 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import MasterLayout from '../../../layout/MasterLayout'
 import {
   getCabCategories,
-  addCabCategory,
-  updateCabCategory,
-  deleteCabCategory,
+  getManufacterers,
+  addManufacterer,
+  updateManufacterer,
+  deleteManufacterer,
 } from '../../../api/MasterApis/CabMasters'
 
-const initialData = [
-  { id: 1, name: 'John Doe', email: 'john@example.com', cab: 'Swift Dzire' },
-  { id: 2, name: 'Jane Smith', email: 'jane@example.com', cab: 'Toyota Etios' },
-]
-
-const CabCategories = () => {
-  const [data, setData] = useState(initialData)
-  const [formData, setFormData] = useState({ name: '' })
+const Manufacterers = () => {
+  const [data, setData] = useState([])
+  const [formData, setFormData] = useState({ name: '', category: '' })
   const [editingIndex, setEditingIndex] = useState(null)
+  const [categoryOptions, setCategoryOptions] = useState([])
 
+  // Fetch category options
   useEffect(() => {
-    getCabCategories()
-      .then((response) => {
-        if (response && response.data.results) {
-          setData(response.data.results)
-        } else {
-          console.log(response)
-          console.error('Failed to fetch manufacturers')
-        }
-      })
-      .catch((error) => console.error(error))
+    getCabCategories().then((res) => {
+      const options = res.data.results.map((c) => ({
+        label: c.name,
+        value: c.id,
+      }))
+      setCategoryOptions(options)
+    })
   }, [])
 
-  const columns = [
-    { key: 'sno', label: 'S.No.' },
-    { key: 'name', label: 'Name' },
-  ]
-
-  const formFields = [{ name: 'name', label: 'Category' }]
-
-  const handleSubmit = async (e, done) => {
-    e.preventDefault()
-
+  // API call for manufacturers
+  const fetchManufacturers = async (page = 1, search = '') => {
     try {
-      if (editingIndex !== null) {
-        const itemToUpdate = data[editingIndex]
-        const response = await updateCabCategory(itemToUpdate.id, formData)
-        const updated = [...data]
-        updated[editingIndex] = response.data
-        setData(updated)
-      } else {
-        const response = await addCabCategory(formData)
-        setData([...data, response.data])
+      const response = await getManufacterers({ page, search })
+
+      if (response?.data?.results) {
+        const adjustedResults = response.data.results.map((x) => ({
+          ...x,
+          category: x.category?.name || '-',
+        }))
+
+        return {
+          results: adjustedResults,
+          count: response.data.count,
+          next: response.data.next,
+          previous: response.data.previous,
+        }
       }
-      setFormData({ name: '', email: '', cab: '' })
-      setEditingIndex(null)
-      done()
-    } catch (error) {
-      console.error('API error:', error)
-      done() // to close the form/dialog even on error if needed
+
+      return { results: [], count: 0 }
+    } catch (err) {
+      console.error('Error in fetchManufacturers:', err)
+      return { results: [], count: 0 }
     }
   }
 
-  const handleEdit = (item, index) => {
-    setFormData({ name: item.name })
-    const actualIndex = data.findIndex((d) => d.id === item.id)
-    setEditingIndex(actualIndex)
+  useEffect(() => {
+    const loadInitialData = async () => {
+      const { results } = await fetchManufacturers()
+      setData(results)
+    }
+    loadInitialData()
+  }, [])
+
+  const columns = [
+    { key: 'id', label: 'ID' },
+    { key: 'name', label: 'Name' },
+    { key: 'category', label: 'Category' },
+  ]
+
+  const formFields = [
+    { name: 'name', label: 'Name', type: 'text' },
+    {
+      name: 'category',
+      label: 'Category',
+      type: 'select',
+      options: categoryOptions,
+    },
+  ]
+
+  const handleSubmit = async (e, done) => {
+    e.preventDefault()
+    try {
+      if (editingIndex !== null) {
+        const itemToUpdate = data[editingIndex]
+        const response = await updateManufacterer(itemToUpdate.id, formData)
+
+        const updated = [...data]
+        updated[editingIndex] = {
+          ...response.data,
+          category:
+            categoryOptions.find((opt) => opt.value === response.data.category)?.label || '-',
+        }
+        setData(updated)
+      } else {
+        const response = await addManufacterer(formData)
+        const newItem = {
+          ...response.data,
+          category:
+            categoryOptions.find((opt) => opt.value === response.data.category)?.label || '-',
+        }
+        setData([...data, newItem])
+      }
+      setFormData({ name: '', category: '' })
+      setEditingIndex(null)
+      done()
+    } catch (error) {
+      console.error('Error in form submit:', error)
+      done()
+    }
+  }
+
+  const handleEdit = (item) => {
+    const index = data.findIndex((d) => d.id === item.id)
+    setFormData({
+      name: item.name,
+      category: categoryOptions.find((opt) => opt.label === item.category)?.value || '',
+    })
+    setEditingIndex(index)
   }
 
   const handleDelete = async (item) => {
     try {
-      await deleteCabCategory(item.id)
+      await deleteManufacterer(item.id)
       setData(data.filter((d) => d.id !== item.id))
     } catch (error) {
       console.error('Error deleting item:', error)
     }
   }
-  console.log(formData, 'formData')
-  console.log(data, 'data')
+
   return (
     <MasterLayout
-      title="Cab Categories"
+      title="Manufacturers"
       data={data}
       columns={columns}
       formFields={formFields}
@@ -87,8 +136,10 @@ const CabCategories = () => {
       onSubmit={handleSubmit}
       onEdit={handleEdit}
       onDeleteConfirmed={handleDelete}
+      deleteType="danger"
+      fetchData={fetchManufacturers}
     />
   )
 }
 
-export default CabCategories
+export default Manufacterers
