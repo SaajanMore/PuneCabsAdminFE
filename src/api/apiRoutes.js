@@ -18,4 +18,11 @@ export const masters = {
     updateModel: (id) => `cabs/models/${id}/`,
     deleteModel: (id) => `cabs/models/${id}/`,
   },
+  driverMasters: {
+    // Drivers (example)
+    addDriver: 'drivers/',
+    getDrivers: 'drivers/',
+    updateDriver: (id) => `drivers/${id}/`,
+    deleteDriver: (id) => `drivers/${id}/`,
+  },
 }

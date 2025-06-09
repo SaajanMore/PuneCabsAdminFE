@@ -42,6 +42,8 @@ const MasterLayout = ({
   deleteType,
   onDeleteConfirmed,
   fetchData, // function to fetch paginated data
+  errors = {},
+  setErrors,
 }) => {
   const [search, setSearch] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
@@ -109,6 +111,8 @@ const MasterLayout = ({
     }
     setDeleteDialog({ show: false, item: null })
   }
+  console.log(errors, 'errors')
+  console.log(formData, 'formData')
 
   return (
     <>
@@ -162,7 +166,7 @@ const MasterLayout = ({
               ) : (
                 <CTable striped hover responsive>
                   <CTableHead>
-                    <CTableRow>
+                    <CTableRow style={{ textWrap: 'nowrap' }}>
                       {columns.map((col) => (
                         <CTableHeaderCell key={col.key}>{col.label}</CTableHeaderCell>
                       ))}
@@ -176,7 +180,9 @@ const MasterLayout = ({
                           <CTableDataCell key={col.key}>
                             {col.key === 'sno'
                               ? (currentPage - 1) * itemsPerPage + idx + 1
-                              : item[col.key]}
+                              : col.render
+                                ? col.render(item)
+                                : item[col.key]}
                           </CTableDataCell>
                         ))}
                         <CTableDataCell>
@@ -228,7 +234,9 @@ const MasterLayout = ({
                 <CRow className="mb-3">
                   {formFields.map((field) => (
                     <CCol md={4} key={field.name}>
-                      <CFormLabel>{field.label}</CFormLabel>
+                      <CFormLabel className="mt-4 mb-2 mx-1 font-bold text-gray-500">
+                        {field.label}
+                      </CFormLabel>
                       {field.type === 'select' ? (
                         field.options ? (
                           <CFormSelect
@@ -264,14 +272,28 @@ const MasterLayout = ({
                           <CSpinner size="sm" />
                         )
                       ) : (
-                        <CFormInput
-                          type={field.type || 'text'}
-                          name={field.name}
-                          value={formData[field.name] || ''}
-                          onChange={(e) =>
-                            setFormData((prev) => ({ ...prev, [field.name]: e.target.value }))
-                          }
-                        />
+                        <>
+                          <CFormInput
+                            type={field.type || 'text'}
+                            name={field.name}
+                            value={formData[field.name] || ''}
+                            onChange={(e) => {
+                              if (field.name === 'mobile' && !/^\d*$/.test(e.target.value)) {
+                                return
+                              }
+                              setFormData((prev) => ({ ...prev, [field.name]: e.target.value }))
+                              if (errors[field.name]) {
+                                setErrors((prev) => ({ ...prev, [field.name]: '' }))
+                              }
+                            }}
+                            invalid={!!errors[field.name]}
+                            maxLength={field.maxLength}
+                            pattern={field.pattern}
+                          />
+                          {errors[field.name] && (
+                            <div className="text-danger small mt-1">{errors[field.name]}</div>
+                          )}
+                        </>
                       )}
                     </CCol>
                   ))}

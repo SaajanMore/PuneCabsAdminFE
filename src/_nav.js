@@ -3,6 +3,7 @@ import CIcon from '@coreui/icons-react'
 import {
   cilBell,
   cilCalculator,
+  cilCarAlt,
   cilChartPie,
   cilCursor,
   cilDescription,
@@ -12,6 +13,7 @@ import {
   cilPuzzle,
   cilSpeedometer,
   cilStar,
+  cilUser,
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 
@@ -35,12 +37,35 @@ const _nav = [
     component: CNavGroup,
     name: 'Cab Masters',
     to: '/masters/cabmasters',
-    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
+    icon: <CIcon icon={cilCarAlt} customClassName="nav-icon" />,
     items: [
       {
         component: CNavItem,
-        name: 'Cab Categories',
+        name: 'Categories',
         to: '/masters/cabmasters/cab_categories',
+      },
+      {
+        component: CNavItem,
+        name: 'Manufacturers',
+        to: '/masters/cabmasters/manufacterers',
+      },
+      {
+        component: CNavItem,
+        name: 'Models',
+        to: '/masters/cabmasters/models',
+      },
+    ],
+  },
+  {
+    component: CNavGroup,
+    name: 'Driver Masters',
+    to: '/masters/drivermasters',
+    icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Drivers',
+        to: '/masters/drivermasters/drivers',
       },
       {
         component: CNavItem,

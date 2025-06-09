@@ -2,39 +2,25 @@ import React, { useState, useEffect } from 'react'
 import MasterLayout from '../../../layout/MasterLayout'
 import {
   getCabCategories,
-  getManufacterers,
-  addManufacterer,
-  updateManufacterer,
-  deleteManufacterer,
+  updateCabCategory,
+  addCabCategory,
+  deleteCabCategory,
 } from '../../../api/MasterApis/CabMasters'
 
-const Manufacterers = () => {
+const CabCategories = () => {
   const [data, setData] = useState([])
-  const [formData, setFormData] = useState({ name: '', category: '' })
+  const [formData, setFormData] = useState({ name: '' })
   const [editingIndex, setEditingIndex] = useState(null)
-  const [categoryOptions, setCategoryOptions] = useState([])
 
   // Fetch category options
-  useEffect(() => {
-    getCabCategories().then((res) => {
-      const options = res.data.results.map((c) => ({
-        label: c.name,
-        value: c.id,
-      }))
-      setCategoryOptions(options)
-    })
-  }, [])
 
   // API call for manufacturers
-  const fetchManufacturers = async (page = 1, search = '') => {
+  const fetchCabCategories = async (page = 1, search = '') => {
     try {
-      const response = await getManufacterers({ page, search })
+      const response = await getCabCategories({ page, search })
 
       if (response?.data?.results) {
-        const adjustedResults = response.data.results.map((x) => ({
-          ...x,
-          category: x.category?.name || '-',
-        }))
+        const adjustedResults = response.data.results
 
         return {
           results: adjustedResults,
@@ -53,7 +39,7 @@ const Manufacterers = () => {
 
   useEffect(() => {
     const loadInitialData = async () => {
-      const { results } = await fetchManufacturers()
+      const { results } = await fetchCabCategories()
       setData(results)
     }
     loadInitialData()
@@ -61,44 +47,30 @@ const Manufacterers = () => {
 
   const columns = [
     { key: 'id', label: 'ID' },
-    { key: 'name', label: 'Name' },
-    { key: 'category', label: 'Category' },
+    { key: 'name', label: 'Category' },
+    // { key: 'category', label: 'Category' },
   ]
 
-  const formFields = [
-    { name: 'name', label: 'Name', type: 'text' },
-    {
-      name: 'category',
-      label: 'Category',
-      type: 'select',
-      options: categoryOptions,
-    },
-  ]
+  const formFields = [{ name: 'name', label: 'Category', type: 'text' }]
 
   const handleSubmit = async (e, done) => {
     e.preventDefault()
     try {
       if (editingIndex !== null) {
         const itemToUpdate = data[editingIndex]
-        const response = await updateManufacterer(itemToUpdate.id, formData)
+        const response = await updateCabCategory(itemToUpdate.id, formData)
 
         const updated = [...data]
-        updated[editingIndex] = {
-          ...response.data,
-          category:
-            categoryOptions.find((opt) => opt.value === response.data.category)?.label || '-',
-        }
+
         setData(updated)
       } else {
-        const response = await addManufacterer(formData)
+        const response = await addCabCategory(formData)
         const newItem = {
           ...response.data,
-          category:
-            categoryOptions.find((opt) => opt.value === response.data.category)?.label || '-',
         }
         setData([...data, newItem])
       }
-      setFormData({ name: '', category: '' })
+      setFormData({ name: '' })
       setEditingIndex(null)
       done()
     } catch (error) {
@@ -111,14 +83,13 @@ const Manufacterers = () => {
     const index = data.findIndex((d) => d.id === item.id)
     setFormData({
       name: item.name,
-      category: categoryOptions.find((opt) => opt.label === item.category)?.value || '',
     })
     setEditingIndex(index)
   }
 
   const handleDelete = async (item) => {
     try {
-      await deleteManufacterer(item.id)
+      await deleteCabCategory(item.id)
       setData(data.filter((d) => d.id !== item.id))
     } catch (error) {
       console.error('Error deleting item:', error)
@@ -127,7 +98,7 @@ const Manufacterers = () => {
 
   return (
     <MasterLayout
-      title="Manufacturers"
+      title="Categories"
       data={data}
       columns={columns}
       formFields={formFields}
@@ -137,9 +108,9 @@ const Manufacterers = () => {
       onEdit={handleEdit}
       onDeleteConfirmed={handleDelete}
       deleteType="danger"
-      fetchData={fetchManufacturers}
+      fetchData={fetchCabCategories}
     />
   )
 }
 
-export default Manufacterers
+export default CabCategories

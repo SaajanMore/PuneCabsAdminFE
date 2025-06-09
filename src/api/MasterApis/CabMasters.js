@@ -36,3 +36,15 @@ export const deleteManufacterer = (id, data) => {
 export const getModels = () => {
   return axiosInstance.get(masters.cabmasters.getModels)
 }
+
+export const addModel = (data) => {
+  return axiosInstance.post(masters.cabmasters.addModel, data)
+}
+
+export const updateModel = (id, data) => {
+  return axiosInstance.put(masters.cabmasters.updateModel(id), data)
+}
+
+export const deleteModel = (id, data) => {
+  return axiosInstance.delete(masters.cabmasters.deleteModel(id), data)
+}

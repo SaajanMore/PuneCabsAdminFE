@@ -10,20 +10,8 @@ import {
 
 const Manufacterers = () => {
   const [data, setData] = useState([])
-  const [formData, setFormData] = useState({ name: '', category: '' })
+  const [formData, setFormData] = useState({ name: '' })
   const [editingIndex, setEditingIndex] = useState(null)
-  const [categoryOptions, setCategoryOptions] = useState([])
-
-  // Fetch category options
-  useEffect(() => {
-    getCabCategories().then((res) => {
-      const options = res.data.results.map((c) => ({
-        label: c.name,
-        value: c.id,
-      }))
-      setCategoryOptions(options)
-    })
-  }, [])
 
   // API call for manufacturers
   const fetchManufacturers = async (page = 1, search = '') => {
@@ -61,19 +49,10 @@ const Manufacterers = () => {
 
   const columns = [
     { key: 'id', label: 'ID' },
-    { key: 'name', label: 'Name' },
-    { key: 'category', label: 'Category' },
+    { key: 'name', label: 'Manufacterer' },
   ]
 
-  const formFields = [
-    { name: 'name', label: 'Name', type: 'text' },
-    {
-      name: 'category',
-      label: 'Category',
-      type: 'select',
-      options: categoryOptions,
-    },
-  ]
+  const formFields = [{ name: 'name', label: 'Manufacterer', type: 'text' }]
 
   const handleSubmit = async (e, done) => {
     e.preventDefault()
@@ -90,16 +69,12 @@ const Manufacterers = () => {
         const updated = [...data]
         updated[editingIndex] = {
           ...response.data,
-          category:
-            categoryOptions.find((opt) => opt.value === response.data.category)?.label || '-',
         }
         setData(updated)
       } else {
         const response = await addManufacterer(payload)
         const newItem = {
           ...response.data,
-          category:
-            categoryOptions.find((opt) => opt.value === response.data.category)?.label || '-',
         }
         setData([...data, newItem])
       }
@@ -117,7 +92,6 @@ const Manufacterers = () => {
     const index = data.findIndex((d) => d.id === item.id)
     setFormData({
       name: item.name,
-      category: categoryOptions.find((opt) => opt.label === item.category)?.value || '',
     })
     setEditingIndex(index)
   }
