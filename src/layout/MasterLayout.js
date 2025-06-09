@@ -44,6 +44,7 @@ const MasterLayout = ({
   fetchData, // function to fetch paginated data
   errors = {},
   setErrors,
+  onRowClick,
 }) => {
   const [search, setSearch] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
@@ -175,7 +176,11 @@ const MasterLayout = ({
                   </CTableHead>
                   <CTableBody>
                     {items.map((item, idx) => (
-                      <CTableRow key={idx}>
+                      <CTableRow
+                        key={idx}
+                        onClick={() => onRowClick && onRowClick(item)} // Add this onClick handler
+                        style={{ cursor: onRowClick ? 'pointer' : 'default' }} // Change cursor if clickable
+                      >
                         {columns.map((col) => (
                           <CTableDataCell key={col.key}>
                             {col.key === 'sno'

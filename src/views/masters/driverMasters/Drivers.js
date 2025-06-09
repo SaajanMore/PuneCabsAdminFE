@@ -19,6 +19,7 @@ import {
 } from '../../../api/MasterApis/DriverMasters'
 import formatToIndianDate from '../../../utils/formatToIndianDate'
 import convertDateToISO from '../../../utils/convertDateToISO'
+import { useNavigate } from 'react-router-dom'
 
 const Drivers = () => {
   const [data, setData] = useState([])
@@ -45,6 +46,7 @@ const Drivers = () => {
   const [manufactererOptions, setManufactererOptions] = useState([])
   const [errors, setErrors] = useState({})
 
+  const navigate = useNavigate()
   // Fetch category options
   useEffect(() => {
     getCabCategories().then((res) => {
@@ -318,7 +320,9 @@ const Drivers = () => {
       console.error('Error deleting item:', error)
     }
   }
-
+  const handleRowClick = (driver) => {
+    navigate(`/masters/drivermasters/drivers/${driver.id}`)
+  }
   return (
     <MasterLayout
       title="Drivers"
@@ -334,6 +338,7 @@ const Drivers = () => {
       fetchData={fetchDrivers}
       errors={errors}
       setErrors={setErrors}
+      onRowClick={handleRowClick}
     />
   )
 }

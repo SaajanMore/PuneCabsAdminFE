@@ -55,7 +55,8 @@ const CabCategories = React.lazy(() => import('./views/masters/cabmasters/CabCat
 const Manufacterers = React.lazy(() => import('./views/masters/cabmasters/Manufacterers'))
 const Models = React.lazy(() => import('./views/masters/cabmasters/Models'))
 
-const Drivers = React.lazy(() => import('./views/masters/drivermasters/Drivers'))
+const Drivers = React.lazy(() => import('./views/masters/driverMasters/Drivers'))
+const DriverDetails = React.lazy(() => import('./views/masters/driverMasters/DriverDetails'))
 
 const routes = [
   { path: '/', exact: true, name: 'Home' },
@@ -110,6 +111,7 @@ const routes = [
   { path: '/masters/cabmasters/models', name: 'Models', element: Models },
   { path: '/masters/drivermasters', name: 'Driver Masters' },
   { path: '/masters/drivermasters/drivers', name: 'Drivers', element: Drivers },
+  { path: '/masters/drivermasters/drivers/:id', name: 'Drivers', element: DriverDetails },
 ]
 
 export default routes

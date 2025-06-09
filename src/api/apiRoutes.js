@@ -22,6 +22,7 @@ export const masters = {
     // Drivers (example)
     addDriver: 'drivers/',
     getDrivers: 'drivers/',
+    getDriverById: (id) => `drivers/${id}/`,
     updateDriver: (id) => `drivers/${id}/`,
     deleteDriver: (id) => `drivers/${id}/`,
   },

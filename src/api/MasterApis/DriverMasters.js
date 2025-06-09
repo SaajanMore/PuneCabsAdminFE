@@ -5,6 +5,10 @@ export const getDrivers = (params) => {
   return axiosInstance.get(masters.driverMasters.getDrivers, { params })
 }
 
+export const getDriverById = (id, params) => {
+  return axiosInstance.get(masters.driverMasters.getDriverById(id), { params })
+}
+
 export const addDriver = (data) => {
   return axiosInstance.post(masters.driverMasters.addDriver, data)
 }
